@@ -1,5 +1,5 @@
 {
-  "name": "my-app",
+  "name": "wallet-app",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -28,7 +28,10 @@
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
-    "extends": "react-app"
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
   },
   "browserslist": {
     "production": [

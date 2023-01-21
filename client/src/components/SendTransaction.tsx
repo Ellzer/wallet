@@ -46,6 +46,17 @@ const SendETH: FC = () => {
   })
   const { sendTransaction } = useSendTransaction(config)
 
+  function handleAmountOnChange(e: React.ChangeEvent<HTMLInputElement>) {
+    let formattedValue = e.target.value.replace(/[^0-9.]|\.(?=.*\.)/g, '')
+    const [integer, decimals] = formattedValue.split('.')
+    setAmount(decimals?.length > -1 ? `${integer}.${decimals.slice(0, 18)}` : integer)
+  }
+
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    sendTransaction?.()
+  }
+
   return (
     <Card shadow="xl" w="full">
       <CardHeader>
@@ -56,12 +67,7 @@ const SendETH: FC = () => {
           <ConnectWallet />
         </Flex>
       </CardHeader>
-      <form
-        onSubmit={(e) => {
-          e.preventDefault()
-          sendTransaction?.()
-        }}
-      >
+      <form onSubmit={handleSubmit}>
         <CardBody>
           <Stack w="sm" mx="auto" spacing="6">
             <Flex justify="space-between" align="baseline">
@@ -71,17 +77,24 @@ const SendETH: FC = () => {
               {address && <Balance address={address} />}
             </Flex>
             <FormControl>
-              <FormLabel>Amount</FormLabel>
+              <FormLabel htmlFor="amount">Amount</FormLabel>
               <Input
+                name="amount"
                 fontSize="sm"
                 type="text"
-                onChange={(e) => setAmount(e.target.value)}
+                onChange={handleAmountOnChange}
                 value={amount}
               />
             </FormControl>
             <FormControl>
-              <FormLabel>Address</FormLabel>
-              <Input fontSize="sm" type="text" onChange={(e) => setTo(e.target.value)} value={to} />
+              <FormLabel htmlFor="address">Address</FormLabel>
+              <Input
+                name="address"
+                fontSize="sm"
+                type="text"
+                onChange={(e) => setTo(e.target.value)}
+                value={to}
+              />
             </FormControl>
           </Stack>
         </CardBody>

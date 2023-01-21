@@ -1,4 +1,4 @@
-import { VStack, Container, Divider, Text } from '@chakra-ui/react'
+import { VStack, Container, Divider } from '@chakra-ui/react'
 import ColorModeSwitcher from './components/ColorModeSwitcher'
 import SendETH from './components/SendTransaction'
 

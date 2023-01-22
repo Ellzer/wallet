@@ -1,13 +1,6 @@
 import { FC } from 'react'
-import { goerli, useAccount, useBalance, useConnect, useDisconnect } from 'wagmi'
-import {
-  Button,
-  Popover,
-  PopoverArrow,
-  PopoverContent,
-  PopoverTrigger,
-  Text,
-} from '@chakra-ui/react'
+import { goerli, useAccount, useConnect, useDisconnect } from 'wagmi'
+import { Button, Popover, PopoverArrow, PopoverContent, PopoverTrigger } from '@chakra-ui/react'
 import { FaSignOutAlt } from 'react-icons/fa'
 import { MetaMaskConnector } from 'wagmi/connectors/metaMask'
 

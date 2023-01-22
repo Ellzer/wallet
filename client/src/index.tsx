@@ -7,11 +7,7 @@ import reportWebVitals from './reportWebVitals'
 import { WagmiConfig, configureChains, createClient, goerli } from 'wagmi'
 import { publicProvider } from 'wagmi/providers/public'
 
-const { provider, webSocketProvider } = configureChains(
-  [goerli],
-  // [infuraProvider({ apiKey: infuraAPIKey }), publicProvider()],
-  [publicProvider()]
-)
+const { provider, webSocketProvider } = configureChains([goerli], [publicProvider()])
 
 const client = createClient({
   autoConnect: true,

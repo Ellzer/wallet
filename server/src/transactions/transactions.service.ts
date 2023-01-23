@@ -2,64 +2,68 @@ import { Injectable } from '@nestjs/common';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import { Transaction, TransactionDocument } from './schemas/transaction.schema';
-import { FilterQuery, Model } from 'mongoose';
+import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
+import { ethers } from 'ethers';
+import { Status, Statuses } from './interfaces/transaction.interface';
+
+const infuraAPIKey = '92354089326049f5b3b4d635be42b27f';
+const networkName = 'goerli';
 
 @Injectable()
 export class TransactionsService {
+  private provider: ethers.providers.InfuraProvider;
+
   constructor(
     @InjectModel(Transaction.name)
     private readonly transactionModel: Model<TransactionDocument>,
-  ) {}
+  ) {
+    this.provider = new ethers.providers.InfuraProvider(
+      networkName,
+      infuraAPIKey,
+    );
+  }
 
   async create(
     createTransactionDto: CreateTransactionDto,
   ): Promise<Transaction> {
     const createdTransaction = new this.transactionModel({
-      ...createTransactionDto,
-      status: 'pending',
+      createTransactionDto,
+      status: Statuses[2],
     });
     return await createdTransaction.save();
+  }
+
+  async update(
+    hash: string,
+    updateTransactionDto: UpdateTransactionDto,
+  ): Promise<Transaction> {
+    return await this.transactionModel.findOneAndUpdate(
+      { hash },
+      updateTransactionDto,
+      {
+        new: true,
+      },
+    );
   }
 
   async findAll(): Promise<Transaction[]> {
     return await this.transactionModel.find().exec();
   }
 
-  async find(
-    transactionFilterQuery: FilterQuery<Transaction>,
-  ): Promise<Transaction[]> {
-    return await this.transactionModel.find(transactionFilterQuery).exec();
+  async findAllByFrom(address: string): Promise<Transaction[]> {
+    return await this.transactionModel.find({ from: address }).exec();
   }
 
-  async findOne(
-    transactionFilterQuery: FilterQuery<Transaction>,
-  ): Promise<Transaction> {
-    return await this.transactionModel.findOne(transactionFilterQuery).exec();
+  async subscribeTransaction(hash: string) {
+    this.provider.once(hash, async (receipt) => {
+      const tx = await this.provider.getTransaction(hash);
+      await this.update(hash, {
+        to: tx.to,
+        from: tx.from,
+        amount: ethers.utils.formatEther(tx.value),
+        status: Statuses[receipt.status] as Status,
+      });
+    });
   }
-
-  async findOneById(id: string): Promise<Transaction> {
-    return this.transactionModel.findById(id).exec();
-  }
-
-  // async findOneAndUpdate(
-  //   transactionFilterQuery: FilterQuery<Transaction>,
-  //   updateTransactionDto: UpdateTransactionDto,
-  // ): Promise<TransactionDocument> {
-  //   return await this.transactionModel.findOneAndUpdate(
-  //     transactionFilterQuery,
-  //     updateTransactionDto,
-  //   );
-  // }
-
-  // async update(
-  //   id: string,
-  //   updateTransactionDto: UpdateTransactionDto,
-  // ): Promise<TransactionDocument> {
-  //   return await this.transactionModel.findByIdAndUpdate(id, updateTransactionDto);
-  // }
-
-  // async remove(id: string) {
-  //   return this.transactionModel.findByIdAndRemove(id);
-  // }
 }

@@ -11,19 +11,16 @@ export class Transaction {
   @Prop({ required: true, unique: true, lowercase: true })
   hash: string;
 
-  // @Prop({ required: true, lowercase: true })
   @Prop({ lowercase: true })
   to: string;
 
-  // @Prop({ required: true, lowercase: true })
   @Prop({ lowercase: true })
   from: string;
 
-  // @Prop({ required: true })
   @Prop()
   amount: string;
 
-  @Prop({ required: true })
+  @Prop()
   status: Status;
 }
 

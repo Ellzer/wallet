@@ -3,22 +3,29 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
-  Delete,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import { TransactionsService } from './transactions.service';
-import { CreateTransactionDto } from './dto/create-transaction.dto';
-import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import { Transaction } from './schemas/transaction.schema';
+import { IsAddressPipe } from './transactions.pipes';
 
 @Controller('transactions')
 export class TransactionsController {
   constructor(private readonly transactionsService: TransactionsService) {}
 
   @Post()
-  async create(@Body() createTransactionDto: CreateTransactionDto) {
-    return this.transactionsService.create(createTransactionDto);
+  async create(@Body() hash: string) {
+    try {
+      const createdTransaction = await this.transactionsService.create({
+        hash,
+      });
+      this.transactionsService.subscribeTransaction(hash);
+      return createdTransaction;
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 
   @Get()
@@ -26,31 +33,10 @@ export class TransactionsController {
     return this.transactionsService.findAll();
   }
 
-  // @Get(':id')
-  // async findOne(@Param('id') id: string): Promise<Transaction> {
-  //   return this.transactionsService.findOne(id);
-  // }
-
-  // @Delete(':id')
-  // async delete(@Param('id') id: string) {
-  //   return this.transactionsService.delete(id);
-  // }
-
-  // @Get(':id')
-  // findOne(@Param('id') id: string) {
-  //   return this.transactionsService.findOne(+id);
-  // }
-
-  // @Patch(':id')
-  // update(
-  //   @Param('id') id: string,
-  //   @Body() updateTransactionDto: UpdateTransactionDto,
-  // ) {
-  //   return this.transactionsService.update(+id, updateTransactionDto);
-  // }
-
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.transactionsService.remove(+id);
-  // }
+  @Get(':address')
+  async findAllByFrom(
+    @Param('address', new IsAddressPipe()) address: string,
+  ): Promise<Transaction[]> {
+    return this.transactionsService.findAllByFrom(address);
+  }
 }

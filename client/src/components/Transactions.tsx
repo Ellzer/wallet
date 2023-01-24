@@ -17,25 +17,44 @@ import {
 import axios from 'axios'
 import { FC, useEffect, useState } from 'react'
 import { FaCheckSquare, FaEthereum, FaTimes } from 'react-icons/fa'
-import { useAccount } from 'wagmi'
+import { useAccount, useWaitForTransaction } from 'wagmi'
 
 const Transactions: FC<{
   refreshTransactions: boolean
   setRefreshTransactions: (arg: boolean) => void
 }> = ({ refreshTransactions, setRefreshTransactions }) => {
   const { address } = useAccount()
+  const [pendingHash, setPendingHash] = useState<`0x${string}`>()
   const [transactions, setTransactions] = useState([])
   const bg = useColorModeValue('gray.200', 'gray.700')
 
-  useEffect(() => {
-    if (address || (refreshTransactions && address)) {
-      const fetchTransactions = async () => {
-        const result = await axios.get(`http://localhost:3001/transactions/${address}`)
-        setTransactions(result.data)
-        setRefreshTransactions(false)
-      }
+  // if there is a pending tx, wait for it to be resolved then refresh transactions
+  useWaitForTransaction({
+    confirmations: 1,
+    hash: pendingHash ? pendingHash : undefined,
+    onSettled() {
+      setRefreshTransactions(true)
+    },
+  })
 
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      const result = await axios.get(`http://localhost:3001/transactions/${address}`)
+      setTransactions(result.data)
+      setRefreshTransactions(false)
+
+      if (result.data.length > 0) {
+        const transaction = result.data.find(({ status }: { status: number }) => status === 2)
+        if (transaction?.hash) {
+          setPendingHash(transaction.hash)
+        }
+      }
+    }
+
+    if (address || (refreshTransactions && address)) {
       fetchTransactions()
+    } else {
+      setTransactions([])
     }
   }, [address, refreshTransactions, setRefreshTransactions])
 

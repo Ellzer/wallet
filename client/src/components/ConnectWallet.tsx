@@ -16,11 +16,13 @@ const ConnectWallet: FC = () => {
   })
   const { disconnect } = useDisconnect()
 
-  if (isConnected) {
+  if (isConnected && address) {
     return (
       <Popover placement="bottom" matchWidth>
         <PopoverTrigger>
-          <Button w="40">{`${address?.slice(0, 6)}...${address?.slice(38, 42)}`}</Button>
+          <Button w="40">{`${address.substring(0, 5)}...${address.substring(
+            address.length - 4
+          )}`}</Button>
         </PopoverTrigger>
         <PopoverContent w="fit-content" _focus={{ boxShadow: 'none' }}>
           <PopoverArrow />

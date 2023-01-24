@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
-import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import { Transaction, TransactionDocument } from './schemas/transaction.schema';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
@@ -25,29 +24,34 @@ export class TransactionsService {
   }
 
   async create({ hash }: CreateTransactionDto): Promise<Transaction> {
-    const createdTransaction = new this.transactionModel({
-      hash,
-      status: Statuses.pending,
-    });
-    return await createdTransaction.save();
+    try {
+      const tx = await this.provider.getTransaction(hash);
+      const createdTransaction = new this.transactionModel({
+        hash,
+        to: tx.to,
+        from: tx.from,
+        amount: ethers.utils.formatEther(tx.value),
+        status: Statuses.pending,
+      });
+      return await createdTransaction.save();
+    } catch (error) {
+      throw new Error(`Failed to create transaction: ${error.message}`);
+    }
   }
 
-  async update(
-    hash: string,
-    updateTransactionDto: UpdateTransactionDto,
-  ): Promise<Transaction> {
+  async updateStatus(hash: string, status: Statuses): Promise<Transaction> {
     return await this.transactionModel.findOneAndUpdate(
       { hash },
-      updateTransactionDto,
+      { status },
       {
         new: true,
       },
     );
   }
 
-  async findAll(): Promise<Transaction[]> {
-    return await this.transactionModel.find().exec();
-  }
+  // async findAll(): Promise<Transaction[]> {
+  //   return await this.transactionModel.find().exec();
+  // }
 
   async findAllByFrom(address: string): Promise<Transaction[]> {
     return await this.transactionModel.find({ from: address }).exec();
@@ -55,13 +59,7 @@ export class TransactionsService {
 
   async subscribeTransaction(hash: string) {
     this.provider.once(hash, async (receipt) => {
-      const tx = await this.provider.getTransaction(hash);
-      await this.update(hash, {
-        to: tx.to,
-        from: tx.from,
-        amount: ethers.utils.formatEther(tx.value),
-        status: receipt.status,
-      });
+      await this.updateStatus(hash, receipt.status);
     });
   }
 }

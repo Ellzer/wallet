@@ -29,10 +29,10 @@ export class TransactionsController {
     }
   }
 
-  @Get()
-  async findAll(): Promise<Transaction[]> {
-    return this.transactionsService.findAll();
-  }
+  // @Get()
+  // async findAll(): Promise<Transaction[]> {
+  //   return this.transactionsService.findAll();
+  // }
 
   @Get(':address')
   async findAllByFrom(

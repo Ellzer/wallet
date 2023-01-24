@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
-import { Status } from '../interfaces/transaction.interface';
+import { Statuses } from '../interfaces/transaction.interface';
 
 export type TransactionDocument = HydratedDocument<Transaction>;
 
@@ -21,7 +21,7 @@ export class Transaction {
   amount: string;
 
   @Prop()
-  status: Status;
+  status: Statuses;
 }
 
 export const TransactionSchema = SchemaFactory.createForClass(Transaction);

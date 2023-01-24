@@ -5,7 +5,7 @@ import { Transaction, TransactionDocument } from './schemas/transaction.schema';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { ethers } from 'ethers';
-import { Status, Statuses } from './interfaces/transaction.interface';
+import { Statuses } from './interfaces/transaction.interface';
 
 const infuraAPIKey = '92354089326049f5b3b4d635be42b27f';
 const networkName = 'goerli';
@@ -27,7 +27,7 @@ export class TransactionsService {
   async create({ hash }: CreateTransactionDto): Promise<Transaction> {
     const createdTransaction = new this.transactionModel({
       hash,
-      status: Statuses[2],
+      status: Statuses.pending,
     });
     return await createdTransaction.save();
   }
@@ -60,7 +60,7 @@ export class TransactionsService {
         to: tx.to,
         from: tx.from,
         amount: ethers.utils.formatEther(tx.value),
-        status: Statuses[receipt.status] as Status,
+        status: receipt.status,
       });
     });
   }

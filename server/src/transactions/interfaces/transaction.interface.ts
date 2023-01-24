@@ -3,5 +3,3 @@ export enum Statuses {
   'completed',
   'pending',
 }
-
-export type Status = keyof typeof Statuses;

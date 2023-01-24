@@ -42,7 +42,9 @@ const Balance: FC<{ address: `0x${string}` }> = ({ address }) => {
   )
 }
 
-const SendTransaction: FC = () => {
+const SendTransaction: FC<{ setRefreshTransactions: (arg: boolean) => void }> = ({
+  setRefreshTransactions,
+}) => {
   const { address, isConnected } = useAccount()
   const [to, setTo] = useState('')
   const [amount, setAmount] = useState('')
@@ -61,6 +63,9 @@ const SendTransaction: FC = () => {
       await axios.post('http://localhost:3001/transactions', {
         hash: data.hash,
       })
+      setRefreshTransactions(true)
+      await data.wait(1)
+      setRefreshTransactions(true)
     },
   })
 

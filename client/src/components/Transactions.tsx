@@ -8,31 +8,36 @@ import {
   TableContainer,
   Heading,
   Icon,
-  Link,
   LinkBox,
   LinkOverlay,
   Text,
   useColorModeValue,
+  Spinner,
 } from '@chakra-ui/react'
 import axios from 'axios'
-import { useEffect, useState } from 'react'
+import { FC, useEffect, useState } from 'react'
 import { FaCheckSquare, FaEthereum, FaTimes } from 'react-icons/fa'
 import { useAccount } from 'wagmi'
 
-export default function Transactions() {
-  const bg = useColorModeValue('gray.200', 'gray.700')
+const Transactions: FC<{
+  refreshTransactions: boolean
+  setRefreshTransactions: (arg: boolean) => void
+}> = ({ refreshTransactions, setRefreshTransactions }) => {
   const { address } = useAccount()
   const [transactions, setTransactions] = useState([])
+  const bg = useColorModeValue('gray.200', 'gray.700')
+
   useEffect(() => {
-    if (address) {
+    if (address || (refreshTransactions && address)) {
       const fetchTransactions = async () => {
         const result = await axios.get(`http://localhost:3001/transactions/${address}`)
         setTransactions(result.data)
+        setRefreshTransactions(false)
       }
 
       fetchTransactions()
     }
-  }, [address])
+  }, [address, refreshTransactions, setRefreshTransactions])
 
   const truncateString = (s: string) => {
     return `${s.substring(0, 4)}...${s.substring(s.length - 4)}`
@@ -70,16 +75,12 @@ export default function Transactions() {
                     <Icon as={FaEthereum} position="relative" top="0.5" />
                   </Td>
                   <Td textAlign="center">
-                    {status === 1 ? (
-                      <Icon
-                        ml="auto"
-                        as={FaCheckSquare}
-                        color="green.400"
-                        position="relative"
-                        top="0.5"
-                      />
-                    ) : (
+                    {status === 0 ? (
                       <Icon as={FaTimes} color="red" position="relative" top="0.5" />
+                    ) : status === 1 ? (
+                      <Icon as={FaCheckSquare} color="green.400" position="relative" top="0.5" />
+                    ) : (
+                      <Spinner size="xs" color="orange" position="relative" top="1px" />
                     )}
                   </Td>
                 </LinkBox>
@@ -93,3 +94,5 @@ export default function Transactions() {
     </>
   )
 }
+
+export default Transactions

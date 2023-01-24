@@ -24,11 +24,9 @@ export class TransactionsService {
     );
   }
 
-  async create(
-    createTransactionDto: CreateTransactionDto,
-  ): Promise<Transaction> {
+  async create({ hash }: CreateTransactionDto): Promise<Transaction> {
     const createdTransaction = new this.transactionModel({
-      createTransactionDto,
+      hash,
       status: Statuses[2],
     });
     return await createdTransaction.save();

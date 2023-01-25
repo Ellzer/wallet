@@ -29,11 +29,6 @@ export class TransactionsController {
     }
   }
 
-  // @Get()
-  // async findAll(): Promise<Transaction[]> {
-  //   return this.transactionsService.findAll();
-  // }
-
   @Get(':address')
   async findAllByFrom(
     @Param('address', new IsAddressPipe()) address: string,

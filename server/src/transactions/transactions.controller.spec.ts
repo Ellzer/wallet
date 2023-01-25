@@ -1,5 +1,6 @@
 import { getModelToken } from '@nestjs/mongoose';
 import { Test, TestingModule } from '@nestjs/testing';
+import { getEthersToken } from 'nestjs-ethers';
 import { TransactionsController } from './transactions.controller';
 import { TransactionsService } from './transactions.service';
 
@@ -14,6 +15,13 @@ describe('TransactionsController', () => {
         {
           provide: getModelToken('Transaction'),
           useValue: {},
+        },
+        {
+          provide: getEthersToken(),
+          useValue: {
+            getTransaction: jest.fn(),
+            once: jest.fn(),
+          },
         },
       ],
     }).compile();

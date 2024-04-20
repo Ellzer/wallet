@@ -12,75 +12,83 @@ import {
   Button,
   Text,
   Icon,
-} from '@chakra-ui/react'
-import axios from 'axios'
-import { utils } from 'ethers'
-import { FC, useEffect, useState } from 'react'
-import { FaEthereum } from 'react-icons/fa'
-import { useAccount, useBalance, usePrepareSendTransaction, useSendTransaction } from 'wagmi'
-import ConnectWallet from './ConnectWallet'
+} from "@chakra-ui/react";
+import axios from "axios";
+import { utils } from "ethers";
+import { FC, useEffect, useState } from "react";
+import { FaEthereum } from "react-icons/fa";
+import {
+  useAccount,
+  useBalance,
+  usePrepareSendTransaction,
+  useSendTransaction,
+} from "wagmi";
+import ConnectWallet from "./ConnectWallet";
 
 const Balance: FC<{ address: `0x${string}` }> = ({ address }) => {
   const { data: balance, isLoading } = useBalance({
     address,
     watch: true,
     onError(error) {
-      console.error('Error fetching balance: ', error)
+      console.error("Error fetching balance: ", error);
     },
-  })
+  });
 
   return (
     <Text fontSize="xs">
       {isLoading ? (
-        'Fetching balance...'
+        "Fetching balance..."
       ) : (
         <>
-          Balance: {balance?.formatted} <Icon as={FaEthereum} position="relative" top="0.5" />
+          Balance: {balance?.formatted}{" "}
+          <Icon as={FaEthereum} position="relative" top="0.5" />
         </>
       )}
     </Text>
-  )
-}
+  );
+};
 
-const SendTransaction: FC<{ setRefreshTransactions: (arg: boolean) => void }> = ({
-  setRefreshTransactions,
-}) => {
-  const { address, isConnected } = useAccount()
-  const [to, setTo] = useState<string>('')
-  const [amount, setAmount] = useState<string>('')
+const SendTransaction: FC<{
+  setRefreshTransactions: (arg: boolean) => void;
+}> = ({ setRefreshTransactions }) => {
+  const { address, isConnected } = useAccount();
+  const [to, setTo] = useState<string>("");
+  const [amount, setAmount] = useState<string>("");
 
   const { config } = usePrepareSendTransaction({
     request: {
       to: to,
       value: amount ? utils.parseEther(amount) : undefined,
     },
-  })
+  });
 
   const { sendTransaction, isLoading, reset } = useSendTransaction({
     ...config,
     async onSuccess(data) {
-      await axios.post('http://localhost:3001/transactions', {
+      await axios.post("http://localhost:3001/transactions", {
         hash: data.hash,
-      })
-      setRefreshTransactions(true)
-      await data.wait(1) // wait for transaction to be resolved, keep isLoading to true
+      });
+      setRefreshTransactions(true);
+      await data.wait(1); // wait for transaction to be resolved, keep isLoading to true
     },
-  })
+  });
 
   // reset useSendTransaction when isConnected value changes, set isLoading to false
   useEffect(() => {
-    reset()
-  }, [isConnected, reset])
+    reset();
+  }, [isConnected, reset]);
 
   function handleAmountOnChange(e: React.ChangeEvent<HTMLInputElement>) {
-    let formattedValue = e.target.value.replace(/[^0-9.]|\.(?=.*\.)/g, '')
-    const [integer, decimals] = formattedValue.split('.')
-    setAmount(decimals?.length > -1 ? `${integer}.${decimals.slice(0, 18)}` : integer)
+    let formattedValue = e.target.value.replace(/[^0-9.]|\.(?=.*\.)/g, "");
+    const [integer, decimals] = formattedValue.split(".");
+    setAmount(
+      decimals?.length > -1 ? `${integer}.${decimals.slice(0, 18)}` : integer,
+    );
   }
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault()
-    sendTransaction?.()
+    e.preventDefault();
+    sendTransaction?.();
   }
 
   return (
@@ -139,7 +147,7 @@ const SendTransaction: FC<{ setRefreshTransactions: (arg: boolean) => void }> = 
         </CardFooter>
       </form>
     </Card>
-  )
-}
+  );
+};
 
-export default SendTransaction
+export default SendTransaction;

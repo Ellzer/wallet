@@ -1,11 +1,11 @@
-import { VStack, Container, Divider } from '@chakra-ui/react'
-import { useState } from 'react'
-import ColorModeSwitcher from './components/ColorModeSwitcher'
-import SendTransaction from './components/SendTransaction'
-import Transactions from './components/Transactions'
+import { VStack, Container, Divider } from "@chakra-ui/react";
+import { useState } from "react";
+import ColorModeSwitcher from "./components/ColorModeSwitcher";
+import SendTransaction from "./components/SendTransaction";
+import Transactions from "./components/Transactions";
 
 export default function App() {
-  const [refreshTransactions, setRefreshTransactions] = useState(false)
+  const [refreshTransactions, setRefreshTransactions] = useState(false);
   return (
     <VStack minH="100vh">
       <ColorModeSwitcher ml="auto" />
@@ -18,5 +18,5 @@ export default function App() {
         />
       </Container>
     </VStack>
-  )
+  );
 }
